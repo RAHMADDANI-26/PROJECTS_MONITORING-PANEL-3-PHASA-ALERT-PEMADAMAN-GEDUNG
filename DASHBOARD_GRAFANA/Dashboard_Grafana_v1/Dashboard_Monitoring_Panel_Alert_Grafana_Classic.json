@@ -1,0 +1,2335 @@
+{
+  "id": null,
+  "uid": null,
+  "title": "Dashboard Monitoring Panel & Alert Gedung A & B",
+  "tags": [],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "id": 10,
+      "title": "New panel",
+      "description": "",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 100,
+        "w": 24,
+        "h": 3
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB}"
+      },
+      "options": {
+        "mode": "html",
+        "content": "<div style=\"text-align:center;\">\r\n  <h1>ALERT PEMADAMAN GEDUNG</h1>\r\n</div>"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "links": []
+    },
+    {
+      "id": 14,
+      "title": "New panel",
+      "description": "",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${DS_INFLUXDB}"
+      },
+      "options": {
+        "mode": "html",
+        "content": "<div style=\"text-align:center;\">\n  <h1>MONITORING PANEL DISTRIBUSI LISTRIK 3 FASA</h1>\n</div>"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "links": []
+    },
+    {
+      "id": 18,
+      "title": "Voltage L-N",
+      "description": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) =>\r\n    r._field == \"voltage_l1_v\" or\r\n    r._field == \"voltage_l2_v\" or\r\n    r._field == \"voltage_l3_v\"\r\n  )\r\n  |> group(columns: [\"_field\"])\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "volt",
+          "decimals": 1,
+          "mappings": [
+            {
+              "type": "range",
+              "options": {
+                "from": 0,
+                "to": 207,
+                "result": {
+                  "color": "red",
+                  "index": 0
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": 207,
+                "to": 253,
+                "result": {
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": 253,
+                "to": 300,
+                "result": {
+                  "color": "red",
+                  "index": 2
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value voltage_l1_v"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L1-N"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value voltage_l2_v"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L2-N"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value voltage_l3_v"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L3-N"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 19,
+      "title": "Voltage L-L",
+      "description": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 3,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) =>\r\n    r._field == \"voltage_l12_v\" or\r\n    r._field == \"voltage_l23_v\" or\r\n    r._field == \"voltage_l31_v\"\r\n  )\r\n  |> group(columns: [\"_field\"])\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "volt",
+          "decimals": 1,
+          "mappings": [
+            {
+              "type": "range",
+              "options": {
+                "from": 0,
+                "to": 360,
+                "result": {
+                  "color": "red",
+                  "index": 0
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": 360,
+                "to": 440,
+                "result": {
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": 440,
+                "to": 500,
+                "result": {
+                  "color": "red",
+                  "index": 2
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value voltage_l12_v"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L1-L2"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value voltage_l23_v"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L2-L3"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value voltage_l31_v"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L3-L1"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 20,
+      "title": "Current L1/L2/L3",
+      "description": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) =>\r\n    r._field == \"current_l1_a\" or\r\n    r._field == \"current_l2_a\" or\r\n    r._field == \"current_l3_a\"\r\n  )\r\n  |> group(columns: [\"_field\"])\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "amp",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value current_l1_a"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L1"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value current_l2_a"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L2"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value current_l3_a"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L3"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 21,
+      "title": "Neutral Current",
+      "description": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 27,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) => r._field == \"current_neutral_a\")\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "amp",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Neutral Current"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 22,
+      "title": "Total Active Power",
+      "description": "",
+      "type": "gauge",
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) => r._field == \"power_active_total_w\")\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "barShape": "flat",
+        "barWidthFactor": 0.54,
+        "effects": {
+          "barGlow": false,
+          "centerGlow": false,
+          "gradient": true
+        },
+        "endpointMarker": "point",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "segmentCount": 1,
+        "segmentSpacing": 0.3,
+        "shape": "gauge",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "sparkline": true,
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatt",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 60,
+                "color": "#EAB839"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "continuous-GrYlRd"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value kw_total"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Active Power"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 23,
+      "title": "Apparent Power",
+      "description": "",
+      "type": "gauge",
+      "gridPos": {
+        "x": 12,
+        "y": 35,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) => r._field == \"power_apparent_total_va\")\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "barShape": "flat",
+        "barWidthFactor": 0.54,
+        "effects": {
+          "barGlow": false,
+          "centerGlow": false,
+          "gradient": true
+        },
+        "endpointMarker": "point",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "segmentCount": 1,
+        "segmentSpacing": 0.3,
+        "shape": "gauge",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "sparkline": true,
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kvoltamp",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "continuous-GrYlRd"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value kva_total"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Apparent Power"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 24,
+      "title": "Reactive Power",
+      "description": "",
+      "type": "gauge",
+      "gridPos": {
+        "x": 0,
+        "y": 43,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) => r._field == \"power_reactive_total_var\")\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "barShape": "flat",
+        "barWidthFactor": 0.54,
+        "effects": {
+          "barGlow": false,
+          "centerGlow": false,
+          "gradient": false
+        },
+        "endpointMarker": "point",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "segmentCount": 63,
+        "segmentSpacing": 0.3,
+        "shape": "gauge",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "sparkline": true,
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kvoltampreact",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 60,
+                "color": "#EAB839"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value kvar_total"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Reactive Power"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 25,
+      "title": "Power Factor",
+      "description": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 51,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) => r._field == \"power_factor\")\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value power_factor"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Power Factor"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 26,
+      "title": "Frequency",
+      "description": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 51,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) => r._field == \"frequency_hz\")\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "rothz",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value frequency_hz"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Frequency"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 27,
+      "title": "Total Energy",
+      "description": "",
+      "type": "gauge",
+      "gridPos": {
+        "x": 12,
+        "y": 43,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) => r._field == \"energy_wh\")\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "barShape": "flat",
+        "barWidthFactor": 0.54,
+        "effects": {
+          "barGlow": false,
+          "centerGlow": false,
+          "gradient": false
+        },
+        "endpointMarker": "point",
+        "minVizHeight": 75,
+        "minVizWidth": 75,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "segmentCount": 63,
+        "segmentSpacing": 0.3,
+        "shape": "gauge",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "sizing": "auto",
+        "sparkline": true,
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "suffix:kWh",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 60,
+                "color": "#EAB839"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value kwh_total"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Energy"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 28,
+      "title": "Voltage L-N History",
+      "description": "",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 59,
+        "w": 24,
+        "h": 11
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) =>\r\n    r._field == \"voltage_l1_v\" or\r\n    r._field == \"voltage_l2_v\" or\r\n    r._field == \"voltage_l3_v\"\r\n  )",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "volt",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "voltage_l1_v"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L1-N"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "voltage_l2_v"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L2-N"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "voltage_l3_v"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L3-N"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 29,
+      "title": "Voltage L-L History",
+      "description": "",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 70,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) =>\r\n    r._field == \"voltage_l12_v\" or\r\n    r._field == \"voltage_l23_v\" or\r\n    r._field == \"voltage_l31_v\"\r\n  )",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "volt",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "voltage_l12_v"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L1-L2"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "voltage_l23_v"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L2-L3"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "voltage_l31_v"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L3-L1"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 30,
+      "title": "Active Power L1/L2/L3",
+      "description": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 11,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) =>\r\n    r._field == \"power_active_l1_w\" or\r\n    r._field == \"power_active_l2_w\" or\r\n    r._field == \"power_active_l3_w\"\r\n  )\r\n  |> group(columns: [\"_field\"])\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatt",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value power_active_l1_w"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L1"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value power_active_l2_w"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L2"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value power_active_l3_w"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L3"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 31,
+      "title": "THD Voltage L-N",
+      "description": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 19,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) =>\r\n    r._field == \"thd_voltage_l1_percent\" or\r\n    r._field == \"thd_voltage_l2_percent\" or\r\n    r._field == \"thd_voltage_l3_percent\"\r\n  )\r\n  |> group(columns: [\"_field\"])\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value thd_voltage_l1_percent"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L1-N"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value thd_voltage_l2_percent"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L2-N"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value thd_voltage_l3_percent"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L3-N"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 32,
+      "title": "THD Voltage L-L",
+      "description": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 19,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) =>\r\n    r._field == \"thd_voltage_l12_percent\" or\r\n    r._field == \"thd_voltage_l23_percent\" or\r\n    r._field == \"thd_voltage_l31_percent\"\r\n  )\r\n  |> group(columns: [\"_field\"])\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value thd_voltage_l12_percent"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L1-L2"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value thd_voltage_l23_percent"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L2-L3"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value thd_voltage_l31_percent"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L3-L1"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 33,
+      "title": "THD Current L1/L2/L3",
+      "description": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 27,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) =>\r\n    r._field == \"thd_current_l1_percent\" or\r\n    r._field == \"thd_current_l2_percent\" or\r\n    r._field == \"thd_current_l3_percent\"\r\n  )\r\n  |> group(columns: [\"_field\"])\r\n  |> last()\r\n  |> keep(columns: [\"_field\", \"_value\"])",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value thd_current_l1_percent"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L1"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value thd_current_l2_percent"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L2"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value thd_current_l3_percent"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "L3"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 34,
+      "title": "Current L1/L2/L3 History",
+      "description": "",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 80,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) =>\r\n    r._field == \"current_l1_a\" or\r\n    r._field == \"current_l2_a\" or\r\n    r._field == \"current_l3_a\"\r\n  )",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "amp",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "current_l1_a"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Current L1"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "current_l2_a"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Current L2"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "current_l3_a"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Current L3"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 35,
+      "title": "Active Power L1/L2/L3 History",
+      "description": "",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 90,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"panel_data\")\r\n  |> filter(fn: (r) =>\r\n    r._field == \"power_active_l1_w\" or\r\n    r._field == \"power_active_l2_w\" or\r\n    r._field == \"power_active_l3_w\"\r\n  )",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatt",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "power_active_l1_w"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Active Power L1"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "power_active_l2_w"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Active Power L2"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "power_active_l3_w"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Active Power L3"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 36,
+      "title": "",
+      "description": "",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 103,
+        "w": 24,
+        "h": 8
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"alert_data\")\r\n  |> filter(fn: (r) => r._field == \"status\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      Status_Listrik: r._value\r\n  }))",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        },
+        {
+          "refId": "B",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r._measurement == \"alert_data\")\r\n  |> filter(fn: (r) => r._field == \"battery_percent\")\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      Sisa_Baterai: r._value\r\n  }))",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        },
+        {
+          "refId": "C",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: -30d)\r\n  |> filter(fn: (r) => r._measurement == \"alert_data\")\r\n  |> filter(fn: (r) => r._field == \"power_status\")\r\n  |> filter(fn: (r) => r._value == 0)\r\n  |> last()\r\n  |> map(fn: (r) => ({\r\n      _value: uint(v: r._time) / uint(v: 1000000),\r\n      _field: \"Terakhir Padam\"\r\n  }))",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "Status_Listrik"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Status Listrik:"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "Sisa_Baterai"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Sisa Baterai:"
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "scope": "series",
+              "options": "_value Terakhir Padam"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Terakhir Padam:"
+              },
+              {
+                "id": "unit",
+                "value": "dateTimeAsLocal"
+              }
+            ]
+          }
+        ]
+      },
+      "links": []
+    },
+    {
+      "id": 37,
+      "title": "Riwayat Pemadaman Listrik",
+      "description": "",
+      "type": "table",
+      "gridPos": {
+        "x": 0,
+        "y": 111,
+        "w": 24,
+        "h": 9
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "afyl7prff3mkgb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "from(bucket: \"TEST\")\r\n  |> range(start: -30d)\r\n  |> filter(fn: (r) => r._measurement == \"alert_data\")\r\n  |> filter(fn: (r) => r._field == \"power_status\")\r\n  |> sort(columns: [\"_time\"], desc: true)",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "afyl7prff3mkgb"
+          },
+          "queryType": "flux",
+          "resultFormat": "time_series"
+        }
+      ],
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "POWER OFF",
+                  "index": 0
+                },
+                "1": {
+                  "text": "POWER ON",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": 0,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "footer": {
+              "reducers": []
+            },
+            "inspect": false
+          }
+        },
+        "overrides": []
+      },
+      "links": [],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Time": "Waktu Kejadian",
+              "power_status": "Event"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h"
+    ]
+  },
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "schemaVersion": 39,
+  "version": 1,
+  "links": []
+}

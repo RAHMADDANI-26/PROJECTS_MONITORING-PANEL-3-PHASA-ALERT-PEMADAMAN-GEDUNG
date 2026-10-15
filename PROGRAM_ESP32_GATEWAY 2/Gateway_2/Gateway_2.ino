@@ -25,10 +25,10 @@ const char* WIFI_PASSWORD = "PASS";
 // MQTT
 // =====================================================
 
-const char* MQTT_SERVER = "BROKER";
+const char* MQTT_SERVER = "BROKER"; 
 const int   MQTT_PORT   = 1883;
 
-const char* MQTT_USERNAME = "USER";
+const char* MQTT_USERNAME = "USERNAME";
 const char* MQTT_PASSWORD = "PASS";
 
 // =====================================================
@@ -56,6 +56,7 @@ volatile bool ethernetReady = false;
 bool wifiReady = false;
 
 bool lastUsingEthernet = false;
+bool networkSelected = false;
 
 // =====================================================
 // TIMER
@@ -264,6 +265,7 @@ void selectNetwork()
       }
 
       lastUsingEthernet = true;
+      networkSelected = true;
     }
 
     return;
@@ -271,30 +273,20 @@ void selectNetwork()
 
   if (wifiReady)
   {
-    if (lastUsingEthernet)
+    if (!networkSelected || lastUsingEthernet)
     {
       Serial.println();
+      Serial.println("[NETWORK] Menggunakan WIFI");
 
-      Serial.println(
-        "[NETWORK] Ethernet tidak tersedia"
-      );
+      Network.setDefaultInterface(WiFi.STA);
 
-      Serial.println(
-        "[NETWORK] Beralih ke WIFI"
-      );
-
-      Network.setDefaultInterface(
-        WiFi.STA
-      );
-
-      if (
-        mqtt.connected()
-      )
+      if (mqtt.connected())
       {
         mqtt.disconnect();
       }
 
       lastUsingEthernet = false;
+      networkSelected = true;
     }
 
     return;
@@ -351,12 +343,19 @@ void connectMQTT()
     clientID
   );
 
-  bool result =
-    mqtt.connect(
+  bool result;
+  if (strlen(MQTT_USERNAME) > 0)
+  {
+    result = mqtt.connect(
       clientID.c_str(),
       MQTT_USERNAME,
       MQTT_PASSWORD
     );
+  }
+  else
+  {
+    result = mqtt.connect(clientID.c_str());
+  }
 
   if (result)
   {
@@ -643,24 +642,19 @@ void processUARTData(
     return;
   }
 
-  if (
-    !isValidJSON(json)
-  )
+  // Gateway 1 hanya seharusnya mengirim JSON. Abaikan baris debug
+  // seperti "======" atau "DIRIS JSON -> Gateway 2" jika masih ikut
+  // terkirim melalui UART.
+  if (json[0] != '{' || json[json.length() - 1] != '}')
   {
-    Serial.println();
+    Serial.print("[UART] Baris non-JSON diabaikan: ");
+    Serial.println(json);
+    return;
+  }
 
-    Serial.println(
-      "[UART] Data bukan JSON"
-    );
-
-    Serial.print(
-      "[UART] Data : "
-    );
-
-    Serial.println(
-      json
-    );
-
+  if (!isValidJSON(json))
+  {
+    Serial.println("[UART] Format JSON tidak valid");
     return;
   }
 
@@ -900,6 +894,8 @@ void setup()
   mqtt.setBufferSize(
     MQTT_BUFFER_SIZE
   );
+  mqtt.setKeepAlive(30);
+  mqtt.setSocketTimeout(5);
 
   Serial.print(
     "[MQTT] Buffer = "

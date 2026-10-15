@@ -3,6 +3,9 @@
 #include <esp_now.h>
 #include <esp_wifi.h>
 #include <esp_system.h>
+#include <math.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/queue.h>
 
 // =====================================================
 // UART KE GATEWAY 2
@@ -146,8 +149,16 @@ uint8_t dirisBuffer[DIRIS_DATA_SIZE];
 
 uint8_t alertBuffer[ALERT_DATA_SIZE];
 
-volatile bool dirisDataReceived = false;
-volatile bool alertDataReceived = false;
+// Queue memisahkan callback ESP-NOW dari proses parsing/Serial di loop().
+// Dengan cara ini paket baru tidak menimpa buffer saat paket sebelumnya diproses.
+#define ESP_NOW_QUEUE_LENGTH 10
+
+typedef struct {
+  uint16_t len;
+  uint8_t payload[DIRIS_DATA_SIZE];
+} EspNowPacket;
+
+QueueHandle_t espNowQueue = nullptr;
 
 // =====================================================
 // CRC16 MODBUS
@@ -191,65 +202,25 @@ void OnDataRecv(
   int len
 )
 {
-  // ===================================================
-  // DATA DIRIS
-  // ===================================================
+  (void)info;
 
-  if (len == DIRIS_DATA_SIZE)
-  {
-    memcpy(
-      dirisBuffer,
-      incomingData,
-      DIRIS_DATA_SIZE
-    );
-
-    dirisDataReceived = true;
-
-    Serial.println();
-    Serial.println("========================================");
-    Serial.println("ESP-NOW DATA DIRIS DITERIMA");
-    Serial.print("Ukuran : ");
-    Serial.print(len);
-    Serial.println(" byte");
-    Serial.println("========================================");
+  if (incomingData == nullptr || espNowQueue == nullptr || len <= 0) {
+    return;
   }
 
-  // ===================================================
-  // DATA ALERT
-  // ===================================================
-
-  else if (len == ALERT_DATA_SIZE)
-  {
-    memcpy(
-      alertBuffer,
-      incomingData,
-      ALERT_DATA_SIZE
-    );
-
-    alertDataReceived = true;
-
-    Serial.println();
-    Serial.println("========================================");
-    Serial.println("ESP-NOW ALERT DITERIMA");
-    Serial.print("Ukuran : ");
-    Serial.print(len);
-    Serial.println(" byte");
-    Serial.println("========================================");
+  if (len != DIRIS_DATA_SIZE && len != ALERT_DATA_SIZE) {
+    // Jangan melakukan Serial.print di callback; cukup abaikan paket tak dikenal.
+    return;
   }
 
-  // ===================================================
-  // DATA TIDAK DIKENAL
-  // ===================================================
+  EspNowPacket packet;
+  packet.len = (uint16_t)len;
+  memcpy(packet.payload, incomingData, (size_t)len);
 
-  else
-  {
-    Serial.println();
-    Serial.println("========================================");
-    Serial.println("DATA ESP-NOW TIDAK DIKENAL");
-    Serial.print("Ukuran : ");
-    Serial.print(len);
-    Serial.println(" byte");
-    Serial.println("========================================");
+  // Callback ESP-NOW berjalan di task Wi-Fi, bukan ISR, jadi gunakan xQueueSend.
+  // Jika queue penuh, paket terbaru dibuang agar callback tidak memblokir.
+  if (xQueueSend(espNowQueue, &packet, 0) != pdPASS) {
+    // Statistik/drop counter bisa ditambahkan jika diperlukan.
   }
 }
 
@@ -451,6 +422,11 @@ void processDirisData()
     energy
   );
 
+  if (json[0] == '\0') {
+    Serial.println("ERROR: JSON DIRIS kosong, paket tidak dikirim.");
+    return;
+  }
+
   Serial.println();
   Serial.println("========== DIRIS JSON ==========");
   Serial.println(json);
@@ -502,14 +478,12 @@ void processAlertData()
     return;
   }
 
-  if (
-    data.batteryPercent < 0.0 ||
-    data.batteryPercent > 100.0
-  )
+  if (!isfinite(data.batteryPercent) ||
+      data.batteryPercent < 0.0f ||
+      data.batteryPercent > 100.0f)
   {
-    Serial.println(
-      "WARNING: Persentase baterai di luar range!"
-    );
+    Serial.println("ERROR: Nilai batteryPercent tidak valid; alert tidak dikirim.");
+    return;
   }
 
   const char *status;
@@ -544,6 +518,11 @@ void processAlertData()
     data.batteryPercent,
     (unsigned long)data.timestamp
   );
+
+  if (json[0] == '\0') {
+    Serial.println("ERROR: JSON ALERT kosong, paket tidak dikirim.");
+    return;
+  }
 
   Serial.println();
   Serial.println("========== ALERT JSON ==========");
@@ -651,6 +630,14 @@ void setup()
     WiFi.macAddress()
   );
 
+  espNowQueue = xQueueCreate(ESP_NOW_QUEUE_LENGTH, sizeof(EspNowPacket));
+  if (espNowQueue == nullptr) {
+    Serial.println("ERROR: Gagal membuat queue ESP-NOW!");
+    while (true) {
+      delay(1000);
+    }
+  }
+
   if (
     esp_now_init() != ESP_OK
   )
@@ -718,41 +705,34 @@ void setup()
 
 void loop()
 {
-  // ===================================================
-  // CEK RESET 7 HARI
-  // ===================================================
-
   checkWeeklyReset();
 
-  // ===================================================
-  // DATA DIRIS
-  // ===================================================
-
-  if (dirisDataReceived)
-  {
-    noInterrupts();
-
-    dirisDataReceived = false;
-
-    interrupts();
-
-    processDirisData();
+  EspNowPacket packet;
+  // Proses semua paket yang tersedia tanpa menunggu lama; maksimal 0 tick.
+  while (xQueueReceive(espNowQueue, &packet, 0) == pdPASS) {
+    if (packet.len == DIRIS_DATA_SIZE) {
+      memcpy(dirisBuffer, packet.payload, DIRIS_DATA_SIZE);
+      Serial.println();
+      Serial.println("========================================");
+      Serial.println("ESP-NOW DATA DIRIS DITERIMA");
+      Serial.print("Ukuran : ");
+      Serial.print(packet.len);
+      Serial.println(" byte");
+      Serial.println("========================================");
+      processDirisData();
+    }
+    else if (packet.len == ALERT_DATA_SIZE) {
+      memcpy(alertBuffer, packet.payload, ALERT_DATA_SIZE);
+      Serial.println();
+      Serial.println("========================================");
+      Serial.println("ESP-NOW ALERT DITERIMA");
+      Serial.print("Ukuran : ");
+      Serial.print(packet.len);
+      Serial.println(" byte");
+      Serial.println("========================================");
+      processAlertData();
+    }
   }
 
-  // ===================================================
-  // DATA ALERT
-  // ===================================================
-
-  if (alertDataReceived)
-  {
-    noInterrupts();
-
-    alertDataReceived = false;
-
-    interrupts();
-
-    processAlertData();
-  }
-
-  delay(5);
+  delay(2);
 }
